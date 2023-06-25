@@ -203,6 +203,10 @@ performance_training = []
 performance_test = []
 N_REPEATS_NN = 3
 
+
+
+
+
 for reg_param in reg_parameters:
     performance_tr = 0
     performance_te = 0
@@ -228,11 +232,20 @@ leaf_settings = [1,2,5,10]
 performance_training = []
 performance_test = []
 
+# Convert train_y to a DataFrame
+train_y_df = pd.DataFrame(train_y, columns=['labelCycling', 'labelStairs', 'labelWalking', 'labelSitting', 'labelOther'])
+
 for no_points_leaf in leaf_settings:
 
+    # class_train_y, class_test_y, class_train_prob_y, class_test_prob_y = learner.decision_tree(
+    #     train_X[selected_features['chapter_5']], train_y, test_X[selected_features['chapter_5']], min_samples_leaf=no_points_leaf,
+    #     gridsearch=False, print_model_details=False)
+
+    # Then pass train_y_df to the decision_tree method
     class_train_y, class_test_y, class_train_prob_y, class_test_prob_y = learner.decision_tree(
-        train_X[selected_features['chapter_5']], train_y, test_X[selected_features['chapter_5']], min_samples_leaf=no_points_leaf,
-        gridsearch=False, print_model_details=False)
+        train_X[selected_features['chapter_5']], train_y_df, test_X[selected_features['chapter_5']],
+        gridsearch=True,
+        print_model_details=True, export_tree_path=EXPORT_TREE_PATH)
 
     # performance_training.append(eval.accuracy(train_y, class_train_y))
     #new
