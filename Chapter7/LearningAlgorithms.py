@@ -48,7 +48,7 @@ class ClassificationAlgorithms:
             nn = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, activation=activation, max_iter=max_iter, learning_rate=learning_rate, alpha=alpha, random_state=42)
 
         # Fit the model
-        nn.fit(train_X, train_y.values.ravel())
+        nn.fit(train_X, train_y) #.values.ravel())
 
         if gridsearch and print_model_details:
             print(nn.best_params_)
@@ -188,7 +188,16 @@ class ClassificationAlgorithms:
 
         # Fit the model
 
-        dtree.fit(train_X, train_y.values.ravel())
+        # dtree.fit(train_X, train_y.values.ravel())
+
+        # NEW:
+
+        # If you're trying to predict multiple outputs at once:
+        dtree.fit(train_X, train_y)
+
+        # If you're only trying to predict one output:
+        for column in train_y.columns:
+            dtree.fit(train_X, train_y[column])
 
         if gridsearch and print_model_details:
             print(dtree.best_params_)

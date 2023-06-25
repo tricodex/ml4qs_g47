@@ -27,6 +27,13 @@ from Chapter7.FeatureSelection import FeatureSelectionClassification
 from Chapter7.FeatureSelection import FeatureSelectionRegression
 from util import util
 from util.VisualizeDataset import VisualizeDataset
+from sklearn.metrics import jaccard_score
+from sklearn.preprocessing import LabelBinarizer
+# from sklearn.preprocessing import MultiLabelBinarizer
+
+# mlb = MultiLabelBinarizer()
+
+
 
 # Read the result from the previous chapter, and make sure the index is of the type datetime.
 DATA_PATH = Path('./datasets/group47/dataset/intermediate_datafiles/')
@@ -56,7 +63,94 @@ DataViz = VisualizeDataset(__file__)
 
 prepare = PrepareDatasetForLearning()
 
-train_X, test_X, train_y, test_y = prepare.split_single_dataset_classification(dataset, ['label'], 'like', 0.7, filter=True, temporal=False)
+# Check if your dataset is empty
+print("Shape of the dataset: ", dataset.shape)
+
+# Check if your dataset is empty
+if dataset.empty:
+    print("Dataset is empty.")
+else:
+    print("Dataset is not empty.")
+
+# Check the shape of your dataset
+print("Shape of the dataset: ", dataset.shape)
+
+# Check the number of instances in each class
+class_counts = dataset['cluster'].value_counts()
+print("Class counts: ", class_counts)
+
+# Identify the least populated class
+least_populated_class = class_counts.idxmin()
+print("Least populated class: ", least_populated_class)
+
+# Check if the least populated class has less than 2 members
+if class_counts.min() < 2:
+    print(f"The class '{least_populated_class}' has only {class_counts.min()} member, which is too few. The minimum number of groups for any class cannot be less than 2.")
+    exit()
+
+
+
+
+# Now, try the split
+try:
+    labels = ['labelCycling', 'labelStairs', 'labelWalking', 'labelSitting', 'labelOther']
+    # Check the number of instances for each label
+    for label in labels:
+        label_counts = dataset[label].value_counts()
+        print(f"Counts for {label}: ", label_counts)
+
+    # binary_labels = mlb.fit_transform(dataset[labels])
+    # dataset[labels] = binary_labels
+    
+
+    
+    train_X, test_X, train_y, test_y = prepare.split_single_dataset_classification(dataset, labels, 'cluster', 0.7, filter=True, temporal=False)
+
+    # Check if labels are in the correct format
+    def check_label_format(y):
+        unique_values = np.unique(y)
+        if len(unique_values) > 2 or not all(i in [0, 1] for i in unique_values):
+            print("Error: Labels are not in binary format.")
+            return False
+        return True
+
+    # Check the format of train_y and test_y
+    if not check_label_format(train_y):
+        print("train_y is not in the correct format.")
+        exit()
+    else:
+        print("train_y is in the correct format.")
+
+    if not check_label_format(test_y):
+        print("test_y is not in the correct format.")
+        exit()
+    else:
+        print("test_y is in the correct format.")
+
+    print("Shape of train_X: ", train_X.shape)
+    print("Shape of train_y: ", train_y.shape)
+    print("Shape of test_x: ",test_X.shape)
+    print("Shape of test_y: ", test_y.shape)
+    print("Shape of train_y values: ", train_y.values.ravel().shape)
+    print("First 10 values of train_y: ", train_y.values.ravel()[:10])
+
+    lb = LabelBinarizer()
+
+    # Fit the LabelBinarizer and transform the labels
+    train_y = lb.fit_transform(train_y)
+    test_y = lb.transform(test_y)
+
+except ValueError as e:
+    print("Error during split: ", str(e))
+    exit()
+
+
+#train_X, test_X, train_y, test_y = prepare.split_single_dataset_classification(dataset, ['label'], 'cluster', 0.7, filter=True, temporal=False)
+
+# labels = ['labelCycling', 'labelStairs', 'labelWalking', 'labelSitting', 'labelOther']
+# train_X, test_X, train_y, test_y = prepare.split_single_dataset_classification(dataset, labels, 'cluster', 0.7, filter=True, temporal=False)
+
+
 
 print('Training set length is: ', len(train_X.index))
 print('Test set length is: ', len(test_X.index))
@@ -81,6 +175,8 @@ features_after_chapter_5 = list(set().union(basic_features, pca_features, time_f
 selected_features = {'chapter_3': features_after_chapter_3,
                         'chapter_4': features_after_chapter_4,
                         'chapter_5': features_after_chapter_5}
+
+
 
 # First, let us consider the performance over a selection of features:
 
@@ -138,7 +234,9 @@ for no_points_leaf in leaf_settings:
         train_X[selected_features['chapter_5']], train_y, test_X[selected_features['chapter_5']], min_samples_leaf=no_points_leaf,
         gridsearch=False, print_model_details=False)
 
-    performance_training.append(eval.accuracy(train_y, class_train_y))
+    # performance_training.append(eval.accuracy(train_y, class_train_y))
+    #new
+    performance_training.append(jaccard_score(train_y, class_train_y, average='samples'))
     performance_test.append(eval.accuracy(test_y, class_test_y))
 
 DataViz.plot_xy(x=[leaf_settings, leaf_settings], y=[performance_training, performance_test],

@@ -56,7 +56,7 @@ import argparse
 
 # Set up file names and locations.
 DATA_PATH = Path('./datasets/group47/dataset/intermediate_datafiles/')
-DATASET_FNAME = 'chapter2_group47_result.csv'
+DATASET_FNAME = '1000chapter2_group47_result.csv'
 RESULT_FNAME = 'chapter3_group47_result_outliers.csv'
 
 def print_flags():

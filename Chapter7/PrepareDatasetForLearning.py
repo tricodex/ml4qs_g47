@@ -52,6 +52,72 @@ class PrepareDatasetForLearning:
     # training_frac of the data for training and the last 1-training_frac for testing. Otherwise, we select points randomly.
     # We return a training set, the labels of the training set, and the same for a test set. We can set the random seed
     # to make the split reproducible.
+    # def split_single_dataset_classification(self, dataset, class_labels, matching, training_frac, filter=True, temporal=False, random_state=0):
+    #     # Create a single class column if we have the 'like' option.
+    #     if matching == 'like':
+    #         dataset = self.assign_label(dataset, class_labels)
+    #         class_labels = self.class_col
+    #     elif len(class_labels) == 1:
+    #         class_labels = class_labels[0]
+
+    #     # Filer NaN is desired and those for which we cannot determine the class should be removed.
+    #     if filter:
+    #         dataset = dataset.dropna()
+    #         dataset = dataset[dataset['cluster'] != self.default_label]
+
+    #     # The features are the ones not in the class label.
+    #     features = [dataset.columns.get_loc(x) for x in dataset.columns if x not in class_labels]
+    #     class_label_indices = [dataset.columns.get_loc(x) for x in dataset.columns if x in class_labels]
+
+    #     # For temporal data, we select the desired fraction of training data from the first part
+    #     # and use the rest as test set.
+    #     if temporal:
+    #         end_training_set = int(training_frac * len(dataset.index))
+    #         training_set_X = dataset.iloc[0:end_training_set, features]
+    #         training_set_y = dataset.iloc[0:end_training_set, class_label_indices]
+    #         test_set_X = dataset.iloc[end_training_set:len(dataset.index), features]
+    #         test_set_y = dataset.iloc[end_training_set:len(dataset.index), class_label_indices]
+    #     # For non temporal data we use a standard function to randomly split the dataset.
+    #     else:
+    #         training_set_X, test_set_X, training_set_y, test_set_y = train_test_split(dataset.iloc[:,features],
+    #                                                                                   dataset.iloc[:,class_label_indices], test_size=(1-training_frac), stratify=dataset.iloc[:,class_label_indices], random_state=random_state)
+    #     return training_set_X, test_set_X, training_set_y, test_set_y
+
+    # def split_single_dataset_classification(self, dataset, class_labels, matching, training_frac, filter=True, temporal=False, random_state=0):
+    #     # Create a single class column if we have the 'like' option.
+    #     if matching == 'like':
+    #         dataset = self.assign_label(dataset, class_labels)
+    #         class_labels = self.class_col
+    #     elif len(class_labels) == 1:
+    #         class_labels = class_labels[0]
+
+    #     # Filter NaN is desired and those for which we cannot determine the class should be removed.
+    #     if filter:
+    #         dataset = dataset.dropna()
+    #         dataset = dataset[dataset['cluster'] != self.default_label]
+
+    #     # The features are the ones not in the class label.
+    #     features = [dataset.columns.get_loc(x) for x in dataset.columns if x not in class_labels]
+    #     class_label_indices = [dataset.columns.get_loc(x) for x in dataset.columns if x in class_labels]
+
+    #     print("Features: ", features)
+    #     print("Class label indices: ", class_label_indices)
+
+    #     # For temporal data, we select the desired fraction of training data from the first part
+    #     # and use the rest as test set.
+    #     if temporal:
+    #         end_training_set = int(training_frac * len(dataset.index))
+    #         training_set_X = dataset.iloc[0:end_training_set, features]
+    #         training_set_y = dataset.iloc[0:end_training_set, class_label_indices]
+    #         test_set_X = dataset.iloc[end_training_set:len(dataset.index), features]
+    #         test_set_y = dataset.iloc[end_training_set:len(dataset.index), class_label_indices]
+    #     # For non temporal data we use a standard function to randomly split the dataset.
+    #     else:
+    #         training_set_X, test_set_X, training_set_y, test_set_y = train_test_split(dataset.iloc[:,features],
+    #                                                                                 dataset.iloc[:,class_label_indices], test_size=(1-training_frac), stratify=dataset.iloc[:,class_label_indices], random_state=random_state)
+    #     return training_set_X, test_set_X, training_set_y, test_set_y
+
+
     def split_single_dataset_classification(self, dataset, class_labels, matching, training_frac, filter=True, temporal=False, random_state=0):
         # Create a single class column if we have the 'like' option.
         if matching == 'like':
@@ -60,14 +126,17 @@ class PrepareDatasetForLearning:
         elif len(class_labels) == 1:
             class_labels = class_labels[0]
 
-        # Filer NaN is desired and those for which we cannot determine the class should be removed.
+        # Filter NaN is desired and those for which we cannot determine the class should be removed.
         if filter:
             dataset = dataset.dropna()
-            dataset = dataset[dataset['class'] != self.default_label]
+            dataset = dataset[dataset['cluster'] != self.default_label]
 
         # The features are the ones not in the class label.
         features = [dataset.columns.get_loc(x) for x in dataset.columns if x not in class_labels]
         class_label_indices = [dataset.columns.get_loc(x) for x in dataset.columns if x in class_labels]
+
+        print("Features: ", features)
+        print("Class label indices: ", class_label_indices)
 
         # For temporal data, we select the desired fraction of training data from the first part
         # and use the rest as test set.
@@ -79,9 +148,15 @@ class PrepareDatasetForLearning:
             test_set_y = dataset.iloc[end_training_set:len(dataset.index), class_label_indices]
         # For non temporal data we use a standard function to randomly split the dataset.
         else:
-            training_set_X, test_set_X, training_set_y, test_set_y = train_test_split(dataset.iloc[:,features],
-                                                                                      dataset.iloc[:,class_label_indices], test_size=(1-training_frac), stratify=dataset.iloc[:,class_label_indices], random_state=random_state)
+            try:
+                training_set_X, test_set_X, training_set_y, test_set_y = train_test_split(dataset.iloc[:,features],
+                                                                                        dataset.iloc[:,class_label_indices], test_size=(1-training_frac), stratify=dataset.iloc[:,class_label_indices], random_state=random_state)
+            except ValueError:
+                print("Stratified sampling not possible due to one of the classes having less than 2 instances. Using simple random sampling instead.")
+                training_set_X, test_set_X, training_set_y, test_set_y = train_test_split(dataset.iloc[:,features],
+                                                                                        dataset.iloc[:,class_label_indices], test_size=(1-training_frac), random_state=random_state)
         return training_set_X, test_set_X, training_set_y, test_set_y
+
 
     def split_single_dataset_regression_by_time(self, dataset, target, start_training, end_training, end_test):
         training_instances = dataset[start_training:end_training]

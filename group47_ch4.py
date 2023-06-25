@@ -47,16 +47,25 @@ def main():
     DataViz = VisualizeDataset(__file__)
 
     # Compute the number of milliseconds covered by an instance based on the first two rows
-    milliseconds_per_instance = (dataset.index[1] - dataset.index[0]).microseconds/1000
+    # milliseconds_per_instance = (dataset.index[1] - dataset.index[0]).microseconds/1000
+    # milliseconds_per_instance = (dataset.index[1] - dataset.index[0]).total_seconds() * 1000
+    milliseconds_per_instance = (dataset.index[1] - dataset.index[0]).total_seconds()
+
+
 
     NumAbs = NumericalAbstraction()
     FreqAbs = FourierTransformation()
 
-    # ... Rest of the code remains the same ...
+    
 
     if FLAGS.mode == 'final':
-        ws = int(float(0.5*60000)/milliseconds_per_instance)
-        fs = float(1000)/milliseconds_per_instance
+        # ws = int(float(0.5*60000)/milliseconds_per_instance)
+        # fs = float(1000)/milliseconds_per_instance
+        # ws = int(float(0.5*60)/milliseconds_per_instance)
+        ws = int(float(0.5*60)/milliseconds_per_instance)
+
+        fs = float(1)/milliseconds_per_instance
+
 
         selected_predictor_cols = [c for c in dataset.columns if not 'label' in c]
 
@@ -76,7 +85,8 @@ def main():
 
         periodic_predictor_cols = ['acc_phone_x', 'acc_phone_y', 'acc_phone_z', 'lin_acc_phone_x', 'lin_acc_phone_y', 'lin_acc_phone_z', 'mag_phone_x', 'mag_phone_y', 'mag_phone_z']
 
-        dataset = FreqAbs.abstract_frequency(copy.deepcopy(dataset), periodic_predictor_cols, int(float(10000)/milliseconds_per_instance), fs)
+        #dataset = FreqAbs.abstract_frequency(copy.deepcopy(dataset), periodic_predictor_cols, int(float(10000)/milliseconds_per_instance), fs)
+        dataset = FreqAbs.abstract_frequency(copy.deepcopy(dataset), periodic_predictor_cols, int(float(10)/milliseconds_per_instance), fs)
 
         # Now we only take a certain percentage of overlap in the windows, otherwise our training examples will be too much alike.
 

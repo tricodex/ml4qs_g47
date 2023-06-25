@@ -74,8 +74,10 @@ def main():
     DataViz = VisualizeDataset(__file__)
 
     # Compute the number of milliseconds covered by an instance based on the first two rows
-    milliseconds_per_instance = (
-        dataset.index[1] - dataset.index[0]).microseconds/1000
+    # milliseconds_per_instance = (
+    #     dataset.index[1] - dataset.index[0]).microseconds/1000
+    milliseconds_per_instance = (dataset.index[1] - dataset.index[0]).total_seconds() * 100
+
 
     MisVal = ImputationMissingValues()
     LowPass = LowPassFilter()
@@ -161,7 +163,7 @@ def main():
         # Determine the sampling frequency.
         # Let us apply a lowpass filter and reduce the importance of the data above the optimal cutoff frequency
         # Determine the sampling frequency.
-        fs = float(1000)/milliseconds_per_instance
+        fs = float(100)/milliseconds_per_instance
 
         # Dictionary of optimal cutoff frequencies for each type of measurement
         optimal_cutoffs = {

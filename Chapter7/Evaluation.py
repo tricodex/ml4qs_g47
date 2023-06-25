@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import math
 
+
 # Class for evaluation metrics of classification problems.
 class ClassificationEvaluation:
 
