@@ -1,0 +1,47 @@
+Basic Features (9 in total): These are the raw sensor readings from the smartphone's accelerometer, linear accelerometer, and magnetometer. Each of these sensors captures three-dimensional data, resulting in three features per sensor. The accelerometer measures the force of acceleration, due to both gravity and movement. The linear accelerometer measures the same but excludes the force of gravity. The magnetometer measures the magnetic field around the device. These measurements provide valuable information about the device's (and by extension, the user's) motion and orientation.
+PCA Features (7 in total): Principal Component Analysis (PCA) is a dimensionality reduction technique. It creates new uncorrelated variables that successively maximize variance. The PCA features are combinations of the original sensor readings that capture the most variance in the data. These features simplify the model by reducing the number of variables it needs to consider.
+Time Features (32 in total): These features are derived from the temporal patterns in the sensor data. They represent various aspects of the time-series data, such as trends, seasonality, or autocorrelation. For instance, they might indicate whether the user's motion is becoming more or less intense, or whether there's a regular pattern in their activity (like the repetitive motion of walking or cycling).
+Frequency Features (81 in total): These features are derived from a frequency content analysis of the sensor data, such as a Fast Fourier Transform (FFT). FFT decomposes a signal into its constituent frequencies, or "frequency domain representation". These features are useful for identifying periodic patterns in the data, such as the rhythmic movement of walking or cycling.
+Cluster Features (1 in total): This feature is the result of applying the k-means clustering algorithm to the dataset with the sensor readings from the accelerometer, linear accelerometer, and magnetometer. The number of clusters (k) is provided as a command-line argument to the script. The algorithm groups similar instances together, which can be useful for identifying common patterns of sensor readings. For example, it might identify clusters of readings that typically occur when the user is walking, cycling, or sitting. This feature provides a high-level summary of the sensor data, aiding the model in identifying patterns more easily.
+ 
+the script applies several feature engineering techniques to the dataset, including numerical abstraction, categorical abstraction, and frequency abstraction.
+Numerical Abstraction: This technique involves summarizing numerical data over a window of time with various measures such as the mean and standard deviation. In this script, the numerical abstraction is performed on the selected predictor columns of the dataset using a window size of 0.5 minutes (30 seconds). The choice of window size is based on the nature of the data and the activities being predicted. The script uses the abstract_numerical method of the NumericalAbstraction class to perform numerical abstraction.
+Categorical Abstraction: This technique involves identifying frequent patterns in categorical data. In this script, categorical abstraction is applied to the 'label' column of the dataset, which likely contains the activity labels. The script uses the abstract_categorical method of the CategoricalAbstraction class to perform categorical abstraction. The method takes the following parameters:
+•	The dataset to be abstracted.
+•	The list of column names to be abstracted.
+•	The abstraction operator to be used (in this case, 'like').
+•	The minimal coverage of the abstraction.
+•	The window size for abstraction.
+•	The minimal number of consecutive instances for abstraction.
+Frequency Abstraction: This technique involves transforming time-series data into the frequency domain, which can be useful for identifying periodic patterns in the data. The script uses a Fast Fourier Transformation (FFT) for frequency abstraction. FFT is a method for decomposing a signal into its constituent frequencies. The script uses the abstract_frequency method of the FourierTransformation class to perform frequency abstraction. The method takes the following parameters:
+•	The dataset to be abstracted.
+•	The list of column names to be abstracted.
+•	The window size for abstraction.
+•	The frequency for abstraction.
+After applying these feature engineering techniques, the script reduces the overlap between windows in the dataset. This is done to ensure that the training examples are not too similar to each other, which could lead to overfitting in the machine learning model.
+Finally, the script saves the feature-engineered dataset to a CSV file for further analysis in subsequent stages of the machine learning experiment. The script also visualizes the dataset, which can be useful for understanding the effects of the feature engineering process. The script is designed to be flexible and adaptable, with various parameters and options that can be adjusted based on the specific requirements of the data and the problem at hand.
+ 
+the clustering method applied is the Non-Hierarchical Clustering, specifically the k-means clustering algorithm.
+The k-means algorithm is a popular method for cluster analysis in data mining. It aims to partition n observations into k clusters in which each observation belongs to the cluster with the nearest mean, serving as a prototype of the cluster. This results in a partitioning of the data space into Voronoi cells.
+In the context of this script, the k-means algorithm is applied to the dataset with the sensor readings from the accelerometer, linear accelerometer, and magnetometer of the phone. The number of clusters (k) is provided as a command-line argument to the script.
+The k-means algorithm is implemented in the k_means_over_instances method of the NonHierarchicalClustering class. The method takes the following parameters:
+•	The dataset to be clustered.
+•	The list of column names to be used for clustering.
+•	The number of clusters (k).
+•	The initialization method for the centroids of the clusters.
+•	The maximum number of iterations for the k-means algorithm.
+•	The number of runs of the k-means algorithm with different centroid initializations.
+The script then visualizes the resulting clusters in a 3D plot using the plot_clusters_3d method of the VisualizeDataset class. It also calculates and plots the silhouette score for the clusters. The silhouette score is a measure of how similar an object is to its own cluster compared to other clusters, with a higher score indicating better clustering.
+Finally, the script prints some statistics about the clusters and saves the clustered dataset to a CSV file for further analysis in subsequent stages of the machine learning experiment.
+ 
+Let's break down the columns:
+•	acc_phone_x, acc_phone_y, acc_phone_z: These columns represent the readings from the phone's accelerometer sensor, which measures the acceleration force in m/s² that is applied to a device on all three physical axes (x, y, and z).
+•	lin_acc_phone_x, lin_acc_phone_y, lin_acc_phone_z: These columns represent the readings from the phone's linear acceleration sensor, which measures acceleration force in m/s² that is applied to a device on all three physical axes (x, y, and z), excluding the force of gravity.
+•	mag_phone_x, mag_phone_y, mag_phone_z: These columns represent the readings from the phone's magnetometer sensor, which measures the ambient magnetic field in μT (microtesla) on all three physical axes (x, y, and z).
+•	labelCycling, labelStairs, labelWalking, labelSitting, labelOther: These columns represent the labels for the activities that the user was performing when the sensor readings were taken. They are likely binary (1 or 0), indicating whether the user was performing the activity (1) or not (0).
+•	pca_1 to pca_7: These columns represent the first seven principal components obtained from a Principal Component Analysis (PCA) of the sensor readings. PCA is a technique used to reduce the dimensionality of datasets, increasing interpretability and minimizing information loss.
+•	The columns with temp_mean_ws_30 and temp_std_ws_30 in their names represent the mean and standard deviation of the sensor readings over a window of 30 data points. These are examples of numerical abstraction, where raw sensor data is summarized over a window of time.
+•	The columns with temp_pattern in their names represent the results of categorical abstraction, where frequent patterns in categorical data are identified. In this case, it seems to be identifying patterns in the activity labels over time.
+•	The columns with freq in their names represent the results of frequency abstraction, where time-series data is transformed into the frequency domain. This is done using a Fast Fourier Transformation (FFT), a method for decomposing a signal into its constituent frequencies.
+•	The cluster column likely represents the results of a clustering algorithm, which groups similar instances together. This can be useful for identifying common patterns of sensor readings.
+Overall, this dataset is a comprehensive collection of features engineered from raw smartphone sensor data, ready to be used for training a machine learning model to predict human activities.

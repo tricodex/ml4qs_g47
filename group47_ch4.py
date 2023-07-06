@@ -116,15 +116,4 @@ if __name__ == '__main__':
     
     main()
 
-    # if __name__ == '__main__':
-    #     # Command line arguments
-    #     parser = argparse.ArgumentParser()
-    #     parser.add_argument('--mode', type=str, default='final',
-    #                         help="Select what version to run: final, aggregation or freq \
-    #                         'aggregation' studies the effect of several aggregation methods \
-    #                         'frequency' applies a Fast Fourier transformation to a single variable \
-    #                         'final' is used for the next chapter ", choices=['aggregation', 'frequency', 'final'])
-
-    #     FLAGS, unparsed = parser.parse_known_args()
-        
-    #     main()
+    

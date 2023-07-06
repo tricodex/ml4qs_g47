@@ -48,7 +48,7 @@ class ClassificationAlgorithms:
             nn = MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, activation=activation, max_iter=max_iter, learning_rate=learning_rate, alpha=alpha, random_state=42)
 
         # Fit the model
-        nn.fit(train_X, train_y.values.ravel())
+        nn.fit(train_X, train_y) #.values.ravel())
 
         if gridsearch and print_model_details:
             print(nn.best_params_)
@@ -188,7 +188,16 @@ class ClassificationAlgorithms:
 
         # Fit the model
 
-        dtree.fit(train_X, train_y.values.ravel())
+        # dtree.fit(train_X, train_y.values.ravel())
+
+        # NEW:
+
+        # If you're trying to predict multiple outputs at once:
+        dtree.fit(train_X, train_y)
+
+        # If you're only trying to predict one output:
+        for column in train_y.columns:
+            dtree.fit(train_X, train_y[column])
 
         if gridsearch and print_model_details:
             print(dtree.best_params_)
@@ -213,7 +222,33 @@ class ClassificationAlgorithms:
                 print(dtree.feature_importances_[ordered_indices[i]])
             if not (os.path.exists(export_tree_path)):
                 os.makedirs(str(export_tree_path))
-            tree.export_graphviz(dtree, out_file=str(export_tree_path) + '/' + export_tree_name, feature_names=train_X.columns, class_names=dtree.classes_)
+            #tree.export_graphviz(dtree, out_file=str(export_tree_path) + '/' + export_tree_name, feature_names=train_X.columns, class_names=dtree.classes_)
+            
+            # Ensure both variables are strings
+            export_tree_path = str(export_tree_path)
+            export_tree_name = str(export_tree_name)
+            print("export_tree_path:", export_tree_path)
+            print("export_tree_name:", export_tree_name)
+            print("Type of train_X.columns:", type(train_X.columns))
+            print("Type of dtree.classes_:", type(dtree.classes_))
+            print("Unique class labels:", np.unique(dtree.classes_))
+            print("Types of class labels:", [type(label) for label in np.unique(dtree.classes_)])
+
+            dtree.classes_ = dtree.classes_.astype(str)
+
+
+            # Then pass them to os.path.join
+            out_file_path = os.path.join(export_tree_path, export_tree_name)
+
+            # Then pass out_file_path to the export_graphviz function
+            tree.export_graphviz(dtree, out_file=out_file_path, feature_names=train_X.columns, class_names=dtree.classes_)
+
+
+
+
+
+
+        
 
         return pred_training_y, pred_test_y, frame_prob_training_y, frame_prob_test_y
 
@@ -258,7 +293,9 @@ class ClassificationAlgorithms:
 
         # Fit the model
 
-        rf.fit(train_X, train_y.values.ravel())
+        #rf.fit(train_X, train_y.values.ravel())
+        rf.fit(train_X, train_y.ravel())
+
 
         if gridsearch and print_model_details:
             print(rf.best_params_)

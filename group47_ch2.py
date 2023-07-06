@@ -36,9 +36,9 @@ import pandas as pd
 
 DATASET_PATH = Path('./datasets/group47/dataset/')
 RESULT_PATH = Path('./datasets/group47/dataset/intermediate_datafiles/')
-RESULT_FNAME = 'chapter2_group47_result.csv'
+RESULT_FNAME = 'chapter2_group47_result_1000.csv'
 
-GRANULARITIES = [7241, 1000, 60000, 250] # We might change this
+GRANULARITIES = [1000] 
 
 [path.mkdir(exist_ok=True, parents=True) for path in [DATASET_PATH, RESULT_PATH]]
 
@@ -57,8 +57,6 @@ for milliseconds_per_instance in GRANULARITIES:
 
     # Add the label data
     dataset.add_event_dataset('labels.csv', 'label_start', 'label_end', 'label', 'binary')
-
-
 
     dataset = dataset.data_table
 
